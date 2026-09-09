@@ -1,0 +1,40 @@
+{
+  "display": {
+    "logical_width": 320,
+    "logical_height": 180,
+    "window_width": 1280,
+    "window_height": 720,
+    "fullscreen": false
+  },
+  "fps": 60,
+  "audio": {
+    "master_volume": 1.0,
+    "music_volume": 0.7,
+    "sfx_volume": 0.8
+  },
+  "debug": true,
+  "controls": {
+    "keyboard": {
+      "UP": ["K_UP", "K_w"],
+      "DOWN": ["K_DOWN", "K_s"],
+      "LEFT": ["K_LEFT", "K_a"],
+      "RIGHT": ["K_RIGHT", "K_d"],
+      "A": ["K_SPACE", "K_z"],
+      "B": ["K_LSHIFT", "K_x"],
+      "START": ["K_RETURN"],
+      "SELECT": ["K_TAB"],
+      "MENU": ["K_ESCAPE"]
+    },
+    "controller": {
+      "UP": [{"kind": "axis", "index": 1, "sign": -1}],
+      "DOWN": [{"kind": "axis", "index": 1, "sign": 1}],
+      "LEFT": [{"kind": "axis", "index": 0, "sign": -1}],
+      "RIGHT": [{"kind": "axis", "index": 0, "sign": 1}],
+      "A": [{"kind": "button", "index": 1}],
+      "B": [{"kind": "button", "index": 2}],
+      "START": [{"kind": "button", "index": 9}],
+      "SELECT": [{"kind": "button", "index": 8}],
+      "MENU": [{"kind": "button", "index": 9}]
+    }
+  }
+}
