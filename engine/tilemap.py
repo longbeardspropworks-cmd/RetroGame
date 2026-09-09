@@ -56,6 +56,21 @@ class TileMap:
     def pixel_height(self):
         return self.height * self.tile_size
 
+    def world_to_tile(self, world_x, world_y):
+        return int(world_x) // self.tile_size, int(world_y) // self.tile_size
+
+    def get_ground_tile(self, tile_x, tile_y):
+        if tile_x < 0 or tile_y < 0 or tile_x >= self.width or tile_y >= self.height:
+            return 0
+        return self.ground[tile_y][tile_x]
+
+    def set_ground_tile(self, tile_x, tile_y, tile_id):
+        """Mutate a single ground-layer cell at runtime (e.g. a dig/mine/
+        build mechanic changing what's drawn and, if paired with a matching
+        collision-layer change, what's solid there)."""
+        if 0 <= tile_x < self.width and 0 <= tile_y < self.height:
+            self.ground[tile_y][tile_x] = tile_id
+
     def is_solid(self, tile_x, tile_y):
         if tile_x < 0 or tile_y < 0 or tile_x >= self.width or tile_y >= self.height:
             return True  # treat out-of-bounds as solid so entities can't walk off the map

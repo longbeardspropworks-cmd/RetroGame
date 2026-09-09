@@ -9,13 +9,11 @@ letter" with no new engine capability. Its ground layer holds the same
 shape using a "dirt" tile id, giving the excavation-site look before any
 digging happens.
 
+Digging (A button) is implemented in games/alphabet_excavation/excavator.py.
+
 Deliberately NOT implemented yet - this is scaffolding only:
-- Digging: pressing A should eventually change the ground-layer cell
-  under the excavator from "dirt" (tile id 1) to "excavated" (tile id 2,
-  already generated and sitting unused in the tileset) so dug terrain
-  reads differently from undug terrain.
 - Detecting/announcing that the whole letter has been excavated.
-- Any tuning of excavator footprint, speed, or animation.
+- Any tuning of excavator footprint, speed, dig duration, or animation.
 - Any state other than this one (no title/menu/progression yet).
 """
 import pygame
@@ -40,7 +38,7 @@ class Level1State(State):
         self.camera.follow(self.excavator.x, self.excavator.y, smoothing=1.0)
 
     def handle_input(self, input_manager):
-        self.excavator.handle_input(input_manager)
+        self.excavator.handle_input(input_manager, self.tilemap)
 
     def update(self, dt):
         for entity in self.entities:
@@ -72,4 +70,5 @@ class Level1State(State):
         return [
             "LEVEL: Capital A",
             f"POS: {self.excavator.x:.1f}, {self.excavator.y:.1f}",
+            f"DIGGING: {self.excavator.is_digging}",
         ]

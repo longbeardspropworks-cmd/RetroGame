@@ -68,6 +68,30 @@ class TileMapTests(unittest.TestCase):
         self.assertEqual(tilemap.spawn_points[0]["name"], "start")
         self.assertEqual(tilemap.triggers[0]["name"], "trigger")
 
+    def test_world_to_tile_converts_pixel_coordinates(self):
+        tilemap = self._make_tilemap()
+        self.assertEqual(tilemap.world_to_tile(0, 0), (0, 0))
+        self.assertEqual(tilemap.world_to_tile(20, 35), (1, 2))
+
+    def test_get_ground_tile_reads_the_ground_layer(self):
+        tilemap = self._make_tilemap()
+        self.assertEqual(tilemap.get_ground_tile(1, 1), 1)
+
+    def test_get_ground_tile_out_of_bounds_is_zero(self):
+        tilemap = self._make_tilemap()
+        self.assertEqual(tilemap.get_ground_tile(-1, 0), 0)
+        self.assertEqual(tilemap.get_ground_tile(99, 0), 0)
+
+    def test_set_ground_tile_mutates_the_layer(self):
+        tilemap = self._make_tilemap()
+        tilemap.set_ground_tile(1, 1, 2)
+        self.assertEqual(tilemap.get_ground_tile(1, 1), 2)
+
+    def test_set_ground_tile_out_of_bounds_is_a_no_op(self):
+        tilemap = self._make_tilemap()
+        tilemap.set_ground_tile(-1, 0, 5)  # must not raise
+        tilemap.set_ground_tile(99, 0, 5)  # must not raise
+
 
 if __name__ == "__main__":
     unittest.main()
