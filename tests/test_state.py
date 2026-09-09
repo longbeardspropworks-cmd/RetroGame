@@ -74,6 +74,88 @@ class StateMachineTests(unittest.TestCase):
         machine.update(0.016)
         machine.render("surface")
 
+    def test_push_does_not_exit_or_reenter_the_suspended_state(self):
+        machine = StateMachine()
+        base = RecordingState(None, "BASE")
+        overlay = RecordingState(None, "OVERLAY")
+        machine.register("BASE", base)
+        machine.register("OVERLAY", overlay)
+
+        machine.change("BASE")
+        machine.push("OVERLAY")
+
+        # BASE was never exited, and its enter() was not called again.
+        self.assertEqual(base.events, [("enter", {})])
+        self.assertEqual(overlay.events, [("enter", {})])
+        self.assertEqual(machine.current_name, "OVERLAY")
+
+    def test_pop_exits_top_and_resumes_state_beneath_without_reentering_it(self):
+        machine = StateMachine()
+        base = RecordingState(None, "BASE")
+        overlay = RecordingState(None, "OVERLAY")
+        machine.register("BASE", base)
+        machine.register("OVERLAY", overlay)
+
+        machine.change("BASE")
+        machine.push("OVERLAY")
+        machine.pop()
+
+        self.assertEqual(overlay.events, [("enter", {}), ("exit", {})])
+        # BASE is resumed with no further enter()/exit() calls of its own.
+        self.assertEqual(base.events, [("enter", {})])
+        self.assertEqual(machine.current_name, "BASE")
+
+    def test_pop_on_empty_stack_is_a_no_op(self):
+        machine = StateMachine()
+        machine.pop()  # must not raise
+        self.assertIsNone(machine.current_name)
+
+    def test_update_and_input_only_reach_the_top_of_the_stack(self):
+        machine = StateMachine()
+        base = RecordingState(None, "BASE")
+        overlay = RecordingState(None, "OVERLAY")
+        machine.register("BASE", base)
+        machine.register("OVERLAY", overlay)
+        machine.change("BASE")
+        machine.push("OVERLAY")
+
+        machine.update(0.016)
+
+        self.assertEqual(base.events, [("enter", {})])  # no ("update", ...) reached BASE
+        self.assertEqual(overlay.events, [("enter", {}), ("update", 0.016)])
+
+    def test_render_draws_the_whole_stack_bottom_to_top(self):
+        machine = StateMachine()
+        base = RecordingState(None, "BASE")
+        overlay = RecordingState(None, "OVERLAY")
+        machine.register("BASE", base)
+        machine.register("OVERLAY", overlay)
+        machine.change("BASE")
+        machine.push("OVERLAY")
+
+        machine.render("surface")
+
+        self.assertIn(("render", "surface"), base.events)
+        self.assertIn(("render", "surface"), overlay.events)
+
+    def test_change_while_stack_has_an_overlay_unwinds_everything(self):
+        machine = StateMachine()
+        base = RecordingState(None, "BASE")
+        overlay = RecordingState(None, "OVERLAY")
+        other = RecordingState(None, "OTHER")
+        machine.register("BASE", base)
+        machine.register("OVERLAY", overlay)
+        machine.register("OTHER", other)
+        machine.change("BASE")
+        machine.push("OVERLAY")
+
+        machine.change("OTHER")
+
+        self.assertEqual(base.events, [("enter", {}), ("exit", {})])
+        self.assertEqual(overlay.events, [("enter", {}), ("exit", {})])
+        self.assertEqual(other.events, [("enter", {})])
+        self.assertEqual(machine.current_name, "OTHER")
+
 
 if __name__ == "__main__":
     unittest.main()

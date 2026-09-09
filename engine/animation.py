@@ -19,6 +19,24 @@ class SpriteSheet:
         return self.sheet.subsurface(rect).copy()
 
 
+_spritesheet_cache = {}
+
+
+def load_spritesheet(path, frame_width, frame_height):
+    """Load and cache a SpriteSheet, so entities sharing the same sheet
+    (e.g. multiple NPCs using one enemy spritesheet) only pay the
+    disk/decode cost once. This is the one shared place entity classes
+    should load sprite sheets from, instead of each keeping its own
+    module-level cache.
+    """
+    key = (path, frame_width, frame_height)
+    sheet = _spritesheet_cache.get(key)
+    if sheet is None:
+        sheet = SpriteSheet(path, frame_width, frame_height)
+        _spritesheet_cache[key] = sheet
+    return sheet
+
+
 class Animation:
     def __init__(self, frames, frame_duration, loop=True):
         self.frames = frames

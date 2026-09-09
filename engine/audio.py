@@ -51,6 +51,14 @@ class AudioManager:
         if self._enabled:
             pygame.mixer.music.stop()
 
+    def pause_music(self):
+        if self._enabled:
+            pygame.mixer.music.pause()
+
+    def resume_music(self):
+        if self._enabled:
+            pygame.mixer.music.unpause()
+
     def set_master_volume(self, value):
         self._master_volume = value
         self._apply_volumes()

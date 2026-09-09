@@ -6,21 +6,11 @@ generic (no character identity, story, or final art) - see CLAUDE.md's
 "Game-Specific Content" section.
 """
 from engine.entity import Entity
-from engine.animation import SpriteSheet, Animation, Animator
-from engine import collision
+from engine.animation import load_spritesheet, Animation, Animator
 
 SPEED = 60.0  # logical pixels per second
 FRAME_DURATION = 0.15
 DIAGONAL_FACTOR = 0.7071  # 1/sqrt(2), so diagonal movement isn't faster
-
-_spritesheet_cache = None
-
-
-def _get_spritesheet():
-    global _spritesheet_cache
-    if _spritesheet_cache is None:
-        _spritesheet_cache = SpriteSheet("assets/sprites/player.png", 16, 16)
-    return _spritesheet_cache
 
 
 class Player(Entity):
@@ -30,7 +20,7 @@ class Player(Entity):
         self.sprite_offset_y = -4
         self.facing = "down"
 
-        sheet = _get_spritesheet()
+        sheet = load_spritesheet("assets/sprites/player.png", 16, 16)
         self.animator = Animator()
         # Sheet rows: 0=down, 1=up, 2=right (2 walk frames each). "left" is
         # derived by horizontally flipping "right" rather than drawing a
@@ -81,6 +71,4 @@ class Player(Entity):
         if moving:
             self.animator.update(dt)
 
-        self.x, self.y = collision.move_with_tile_collision(
-            self.x, self.y, self.collision_width, self.collision_height,
-            self.vx * dt, self.vy * dt, tilemap)
+        self.move_with_collision(self.vx * dt, self.vy * dt, tilemap)
