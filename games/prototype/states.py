@@ -2,8 +2,8 @@
 
 These compose reusable engine systems (tilemap, camera, collision) with
 this project's placeholder test content (the test map and Player). They
-live under game/, not engine/, because they reference specific data
-paths and the Player class - engine/ stays free of project assumptions.
+live under games/prototype/, not engine/, because they reference specific
+data paths and the Player class - engine/ stays free of project assumptions.
 """
 import pygame
 
@@ -11,7 +11,7 @@ from engine.state import State
 from engine.tilemap import TileMap
 from engine.camera import Camera
 from engine.ui import TextRenderer
-from game.player import Player
+from games.prototype.player import Player
 
 TEST_MAP_PATH = "data/maps/test_map.json"
 

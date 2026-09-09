@@ -82,7 +82,7 @@ Dev-only keys (not part of the logical input abstraction):
 5. A 30x20 tile test map (`data/maps/test_map.json`), larger than the
    320x180 screen, with ground/collision/decoration/foreground layers,
    a spawn point, and a trigger region.
-6. A controllable placeholder test entity (`game/player.py`).
+6. A controllable placeholder test entity (`games/prototype/player.py`).
 7. Solid tile collision with axis-separated sliding.
 8. Camera following with configurable smoothing and map-bounds clamping.
 9. Sprite-sheet animation (`engine/animation.py`), including deriving a
@@ -96,6 +96,29 @@ Dev-only keys (not part of the logical input abstraction):
 13. Clean engine/game/data/assets project structure.
 14. Windows setup instructions (above).
 15. Raspberry Pi setup instructions (above).
+
+## Project structure: engine vs. games
+
+`engine/` is generic and reusable - it has no knowledge of any specific
+game's content. Each game is its own project under `games/`, with its
+own entry point, states, entities, and data, that composes `engine/`'s
+systems (rendering, camera, input, tilemap, collision, animation, state
+machine, asset cache) into actual gameplay:
+
+- `games/prototype/` - the technical-prototype game documented above.
+  Entry point: `python main.py` (kept at the project root since that's
+  its established, documented entry point).
+- `games/alphabet_excavation/` - the first real game (an alphabet-
+  learning game where the player excavates letter shapes). Entry point:
+  `python -m games.alphabet_excavation.main` (must use `-m`, not a
+  direct file path - see the docstring in that file for why). Run
+  `python games/alphabet_excavation/tools/generate_assets.py` once first
+  to generate its placeholder tileset/sprite.
+
+`engine/game.py`'s `Game` class takes a `register_states` function so
+each game supplies its own set of states and initial state without the
+engine needing to know about any game's content - see `main.py` or
+`games/alphabet_excavation/main.py` for the (very short) pattern.
 
 ## Known limitations / deferred work
 

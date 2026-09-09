@@ -14,7 +14,16 @@ MAX_FRAME_TIME = 0.25  # clamp long stalls so update() doesn't spiral
 
 
 class Game:
-    def __init__(self, settings_path="data/settings.json"):
+    def __init__(self, register_states, settings_path="data/settings.json"):
+        """`register_states` is called once with this Game instance and is
+        responsible for registering every state the game needs on
+        self.state_machine and setting the initial state (typically via
+        state_machine.change(...)). Which states exist, and which one runs
+        first, is entirely game-specific - the engine has no opinion on it,
+        so any game can plug in its own state set without touching engine
+        code (see games/prototype/main.py and games/alphabet_excavation/main.py
+        for the two current examples).
+        """
         self.settings = load_settings(settings_path)
         pygame.init()
 
@@ -24,21 +33,10 @@ class Game:
         self.debug = self.settings.get("debug", False)
 
         self.state_machine = StateMachine()
-        self._register_states()
+        register_states(self)
 
         self._debug_text = TextRenderer()
         self.running = True
-
-    def _register_states(self):
-        # Imported here (not at module scope) so engine/ never has to import
-        # game/ at load time - keeps engine code independent of game content.
-        from game.states import BootState, TitleState, GameplayState, PauseState
-
-        self.state_machine.register("BOOT", BootState(self))
-        self.state_machine.register("TITLE", TitleState(self))
-        self.state_machine.register("GAMEPLAY", GameplayState(self))
-        self.state_machine.register("PAUSE", PauseState(self))
-        self.state_machine.change("BOOT")
 
     def run(self):
         clock = pygame.time.Clock()

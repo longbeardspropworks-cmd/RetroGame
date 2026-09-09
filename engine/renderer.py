@@ -20,7 +20,7 @@ class Renderer:
         else:
             self.window = pygame.display.set_mode(self._windowed_size, pygame.RESIZABLE)
 
-        pygame.display.set_caption("Retro Game Prototype")
+        pygame.display.set_caption(display_config.get("window_title", "Game"))
         self.logical_surface = pygame.Surface((self.logical_width, self.logical_height)).convert()
 
         self._scale = 1
