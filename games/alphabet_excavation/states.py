@@ -10,9 +10,10 @@ shape using a "dirt" tile id, giving the excavation-site look before any
 digging happens.
 
 Digging (A button) is implemented in games/alphabet_excavation/excavator.py.
+Level completion (every dirt cell excavated) is detected below and shown
+with a simple banner - no progression to a next level yet.
 
 Deliberately NOT implemented yet - this is scaffolding only:
-- Detecting/announcing that the whole letter has been excavated.
 - Any tuning of excavator footprint, speed, dig duration, or animation.
 - Any state other than this one (no title/menu/progression yet).
 """
@@ -21,9 +22,12 @@ import pygame
 from engine.state import State
 from engine.tilemap import TileMap
 from engine.camera import Camera
-from games.alphabet_excavation.excavator import Excavator
+from engine.ui import TextRenderer
+from games.alphabet_excavation.excavator import Excavator, DIRT_TILE_ID
 
 LEVEL_1_PATH = "games/alphabet_excavation/data/levels/level_1_a.json"
+
+_text = TextRenderer()
 
 
 class Level1State(State):
@@ -37,6 +41,8 @@ class Level1State(State):
         self.camera.set_world_bounds(self.tilemap.pixel_width, self.tilemap.pixel_height)
         self.camera.follow(self.excavator.x, self.excavator.y, smoothing=1.0)
 
+        self.is_complete = False
+
     def handle_input(self, input_manager):
         self.excavator.handle_input(input_manager, self.tilemap)
 
@@ -49,6 +55,12 @@ class Level1State(State):
             smoothing=0.15,
         )
 
+        if not self.is_complete and self._is_fully_excavated():
+            self.is_complete = True
+
+    def _is_fully_excavated(self):
+        return not any(tile_id == DIRT_TILE_ID for row in self.tilemap.ground for tile_id in row)
+
     def render(self, surface):
         surface.fill((20, 16, 12))
         self.tilemap.render_ground(surface, self.camera)
@@ -59,6 +71,9 @@ class Level1State(State):
         if self.game.debug:
             self._render_collision_boxes(surface)
 
+        if self.is_complete:
+            self._render_complete_banner(surface)
+
     def _render_collision_boxes(self, surface):
         for entity in self.entities:
             rect = entity.get_collision_rect()
@@ -66,9 +81,18 @@ class Level1State(State):
             debug_rect = pygame.Rect(round(screen_x), round(screen_y), rect.width, rect.height)
             pygame.draw.rect(surface, (255, 0, 0), debug_rect, 1)
 
+    def _render_complete_banner(self, surface):
+        overlay = surface.copy()
+        overlay.fill((0, 0, 0))
+        overlay.set_alpha(120)
+        surface.blit(overlay, (0, 0))
+        _text.draw(surface, "LEVEL COMPLETE!", 108, 75, color=(255, 255, 255))
+        _text.draw(surface, "YOU DUG OUT THE LETTER A", 68, 95, color=(255, 220, 120))
+
     def debug_lines(self):
         return [
             "LEVEL: Capital A",
             f"POS: {self.excavator.x:.1f}, {self.excavator.y:.1f}",
             f"DIGGING: {self.excavator.is_digging}",
+            f"COMPLETE: {self.is_complete}",
         ]
